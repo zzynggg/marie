@@ -1,0 +1,270 @@
+﻿/***Main***
+Begin,				JnS subInputNames		/allow user to input name
+					JnS printStringName		/to print user input name
+                    Halt					/to terminate the program
+
+FirstAddress, HEX 300						/to maintain the initial address
+a, HEX 300                 					/a is input address                        
+A_count, DEC 0  							/counter for num of user input new full name 
+newLine, HEX 10								/300 + 010 to store new name to new address
+
+/#Set new address for new name#
+newAddress,	 		JnS NLloop				/to get new address
+                    Load a					/load the new a address
+                    Store a					/store new address into a 
+                    Jump Nloop				/jump to Nloop allow user input first name
+
+A_counter, Dec 0 							/counter for calculation for new address
+
+/***Subroutine for new address***
+NLloop,				HEX 0					/subroutine
+					Load A_count			/counter for num of user input new full name
+					Store A_counter			/duplicate the counter to perform calculation for new address
+                    Load FirstAddress		/load initial address 300 and   
+                    Store a					/store address 300 into a
+                    Jump Loops				/to loop for a new address
+                    
+Loops,				Load A_counter			/perform calculation for new address
+					Skipcond 800			/check A_counter >0
+                    JumpI NLloop			/if new address is calculated, user can input new name into new address
+                    Load a					/a = 300
+                    Add newLine				/a + newLine = new address (eg.300+010=310)
+                    Store a					/store new address into a
+                    Load A_counter			/act as counter to  calculate for new address
+                    Subt one				/A_counter - 1 until A_counter become 0
+                    Store A_counter			/after subtraction store the value into A_counter 
+                    Jump Loops              /if A_counter != 0 loop again    
+
+/***Subroutine to input full name***                    
+subInputNames, 		HEX 0  					/subroutine
+Nloop,				JnS FirstName			/jump to first name and allow user to input char			
+                    Load a					/prepare a new address slot for the next char
+       				add one					/by adding 1 to previous address (eg;300 + 001 = 301)
+        			store a					/store new address into a 
+                    Load Count				/reload counter for last name
+                    Clear					/by clearing the previous counter value
+                    Add six					/add six into Count 
+                    Store Count				/after adding store it into Count
+                	JnS LastName			/subroutine
+					Load a					/prepare a new address slot for the next char
+       				add one					/by adding 1 to previous address
+        			store a					/store new address into a 
+                    Load A_count			/counter for number of times user input full name
+					Add one					/by adding 1 into A_count
+                    Store A_count			/after adding, store the value into A_count
+                	Jump newAddress			/allow user to input new name into new address
+
+/***Subroutine to input first name***
+FirstName,			HEX 0					/subroutine
+Floop,				Input					/user input first name 1 char per input
+					StoreI a				/store the char into the address in a
+                    subt dollar				/check if user input '$', terminate for user input then print name
+        			Skipcond 800			/check a - '$' >0
+					JumpI subInputNames		/if yes, a - '$' = 0, print name
+                    LoadI a					/check wherther the input is char or '0'
+                	Subt zero				/by subtracting '0'
+            		Skipcond 400			/if a - '0' = 0, terminate first name
+            		Jump Cloop				/jump to first counter to check the length of first name
+            		JumpI FirstName			/if is '0' terminate first name, now user input for last name
+
+zero, HEX 30        						/to check the input is '0' or char
+
+/#First counter to limit user input first name not more than 5 char#
+/#user can only input x<=5 char and the sixth char must be ZERO to terminate first name#
+Cloop,				Load Count				/act as counter to limit the user input
+					Subt one				/by subtracting 1
+                    store Count				/after subtracting, store into Count
+					Skipcond 800			/check Count > 0
+            		Jump Error				/if user input more than 5 char, checking the sixth char process will occur
+                    Load a					/prepare a new address slot for the next char
+       				add one					/by adding 1 to previous address
+        			store a					/store new address into a 
+            		Jump Floop 				/loop for first name 
+
+/#check the sixth char is '0' or not in first name#
+/#user are allowed to input '0' in the sixth char only#
+/#program will keep loop until user input '0'# 
+Error,				input					/allow user to input zero 
+                    StoreI a				/store the char into the address in a
+                    loadI a					/load the value in address a
+                    subt dollar				/check if user input '$', terminate for user input then print name
+        			Skipcond 800			/check a - '$' >0
+                    JumpI subInputNames		/if yes, a - '$' = 0, print name
+                    LoadI a					/load the value in address a
+                    Subt zero				/subtract by '0' 
+                    Skipcond 400			/check a - '0' = 0 	
+					Jump Error				/if no, it will keep loop until user input '0'
+                    JumpI FirstName 		/if yes, user inputted '0', first name terminate 
+ 
+Count, Dec 6								/counter to limit user input 
+six,	Dec 6								/to reload the counter, 6 include zero char
+one, Dec 1									/to increment
+dollar, HEX 24								/act as dollar; to terminate the program
+
+/***Subroutine to input last name***
+LastName,			HEX 0					/subroutine
+Lloop,				Input					/user input last name 1 char per input
+					StoreI a				/store the char into the address in a
+                    subt dollar				/check if user input '$', terminate for user input then print name
+        			Skipcond 800			/check a - '$' >0
+					JumpI subInputNames     /if yes, a - '$' = 0, print name              
+					LoadI a					/check wherther the input is char or '0'
+                	Subt zero				/by subtracting '0'
+            		Skipcond 400			/if user input '0' jump to check the next char is '0' or not
+            		Jump C2loop				/jump to second counter to check the length of last name
+                	JnS LastCheck           /check after the '0' is '0' or other char    
+            		JumpI LastName 			/if is '0''0' terminate last name, now user input for new first name
+
+/***Subroutine to check the next num is zero anot***
+LastCheck,			Hex 0					/subroutine
+doublecheck,		Load a 					/prepare a new address slot for the next char
+                    Add one					/by adding 1 to previous address
+                    Store a 				/store new address into a 
+					input 					/user input next char after input '0'
+                    StoreI a				/store the char into address a 
+                    subt dollar				/check if user input '$', terminate for user input then print name
+        			Skipcond 800			/check a - '$' >0
+					JumpI subInputNames		/if yes, a - '$' = 0, print name
+                    LoadI a					/check wherther the user input is '0' or not
+                    Subt zero				/by subtrating '0'
+                    skipcond 400			/check char in address a - '0' = 0
+                    Jump Errorss            /if user input is not '0', checking the seventh char process will occur  
+                    Load Count 				/if user input '0' twice ('0''0') terminate last name 
+                    Clear 					/reset first counter for first name
+                    Add six					/by adding six
+                    store Count				/after adding, store into Count
+					JumpI LastCheck			/now user allow to enter new first name
+
+/#Second counter to limit user input last name not more than 5 char#
+/#user can only input x<=5 char and the sixth and seventh char must be ZERO to terminate last name #              
+C2loop,				Load Count				/act as counter to limit the user input
+					Subt one				/by subtracting 1
+                    store Count				/after subtracting, store into Count
+					Skipcond 800			/check Count>0
+            		Jump Errors				/if user input more than 5 char, checking the sixth char process will occur
+                    Load a					/prepare a new address slot for the next char
+       				add one					/by adding 1 to previous address
+        			store a					/store new address into a 
+            		Jump Lloop 				/loop for last name
+
+/#check the sixth char is '0' or not in last name#
+/#user are allowed to input '0' in the sixth char only#
+/#program will keep loop until user input '0'# 
+Errors, 			input					/allow user to input zero 
+					StoreI a				/store the char into the address in a
+					LoadI a					/load the value in address a
+                    subt dollar				/check if user input '$', terminate for user input then print name
+        			Skipcond 800			/check a - '$' >0
+                    JumpI subInputNames		/if yes, a - '$' = 0, print name
+                    LoadI a					/load the value in address a
+                    Subt zero				/subtract by '0' 
+                    Skipcond 400			/check a - '0' = 0 	
+					Jump Errors				/if no, it will keep loop until user input '0'
+                    Jump doublecheck  		/if yes, user inputted '0', double check for seventh char is '0' or not 
+
+/#check the seventh char is '0' or not in last name#
+/#user are allowed to input '0' in the seventh char only#
+/#program will keep loop until user input '0'# 
+Errorss, 			input					/allow user to input zero 
+					StoreI a				/store the char into the address in a
+					LoadI a					/load the value in address a
+                    subt dollar				/check if user input '$', terminate for user input then print name
+        			Skipcond 800			/check a - '$' >0
+                    JumpI subInputNames		/if yes, a - '$' = 0, print name
+                    LoadI a					/load the value in address a
+                    Subt zero				/subtract by '0' 
+                    Skipcond 400			/check a - '0' = 0 	
+					Jump Errorss			/if no, it will keep looping until user input '0'
+                    Load Count 				/if user input '0' twice ('0''0') terminate last name
+                    Clear 					/reset first counter for first name
+                    Add six					/by adding six
+                    store Count				/after adding, store into Count
+                    JumpI LastName  		/if yes, user inputted '0''0', last name terminated  
+
+/***Subroutine to print full name***
+printStringName, 	HEX 0					/subroutine
+					Load FirstAddress		/reset the address a to initial address which is 300
+					Store a					/store initial address 300 into a
+					Jump iterate			/loop for new address
+
+Space, HEX 20								/act as space; seperate the first and last name
+newline, HEX A								/act as enter; throw a new line
+P_count, DEC 0								/counter for user input full name in order to retrive the value
+P_counter, DEC 0							/counter for calculation for new address in order to retrive the value
+
+/#To terminate the program printing name#
+iterate,			LoadI a					/check if '$' in the address, terminate the printing process
+                    Subt dollar				/by subtracting '$'
+                    Skipcond 400			/if a - '$' = 0, Terminate program
+                    Jump replace			/if a is not '$' jump to replace, then continue printing process
+					JumpI printStringName	/if a is '$' terminate entire program
+
+/#To replace zero to space and double zero to new line#
+replace,			LoadI a					/load the value that store in address a
+                    Subt zero 				/subtract a with '0'
+                    Skipcond 400			/check a - '0' = 0
+                    Jump printName			/if no, continue print name
+                    Load Space				/if yes, value in the address is '0'
+                    Output					/replace the '0' to space
+                    Load a					/to retrieve the next address value
+                    Add one					/by adding 1
+                    Store a 				/after adding, store into a
+                    LoadI a					/check the next char after input '0' is '0' or not
+                    Subt zero				/if yes, '0''0' throw a new line 
+                    Skipcond 400			/check a - '0' = 0
+                    Jump printName			/if no, continue print name
+                    Load newline			/after '0''0' a new address is needed to retrieve the next name
+                    Output					/print the char	
+                    Load P_count			/counter for printing full name successfully 
+					Add one					/by adding 1
+                    Store P_count			/after adding, store into P_count
+     				Jump PnewAddress		/to get the new address to print the next new full name
+
+/#Set new address for new name to print it#
+PnewAddress,	 	JnS printAddress		/to get new address
+                    Load a					/load the new a address
+                    Store a					/store new address into a
+                    Jump iterate            /get the new address and jump to print name   
+							 
+/***Subroutine for new address***
+printAddress,		HEX 0					/subroutine
+					Load P_count			/counter of printing a fullname successfully
+					Store P_counter			/duplicate the printing counter to calculate for new address
+                    Load FirstAddress		/load initial address 300
+                    Store a					/store address 300 into a
+                    Jump PLoops				/to loop for a new address in order to retrieve the value
+
+PLoops,				Load P_counter			/perform calculation for new address
+					Skipcond 800			/check P_counter >0
+                    JumpI printAddress		/if calculation done, the value in the new address can be retrieved 
+                    Load a					/a = 300
+                    Add newLine				/a + newLine = new address (eg.300+010=310)	
+                    Store a					/store new address into a 
+                    Load P_counter			/act as counter to calculate for new address
+                    Subt one				/by subtracting 1 until P_counter = 0
+                    Store P_counter			/after subtrating, store the value into P_counter
+                    Jump PLoops				/if P_counter != 0 loop again
+
+/#Print the name that store in specific address#
+/#print the value after user input '0' is not '0'(not'0''0')#
+/#print last name# 
+printName,          JnS terminate			/subroutine	
+					LoadI a					/load the value in address a
+                    output					/print it
+                    Load a					/to retrieve the next address value 
+                    Add one					/by adding 1
+                    Store a					/after adding, store into a
+                    Jump iterate			/loop for next char, check it is '0' or not
+
+/***Subroutine to double check the value for last name after '0' is '$' then terminate the printing process***
+terminate,			HEX 0					/subroutine
+					LoadI a					/check if '$' in the address, terminate the printing process
+                    Subt dollar				/by subtracting '$'
+                    Skipcond 400			/if a -'$'= 0, END program
+                    JumpI terminate			/if not '$' jump to printName, then continue printing process
+					JumpI printStringName	/if is '$' terminate entire program
+
+                    
+                    
+
+

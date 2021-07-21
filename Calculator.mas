@@ -1,0 +1,136 @@
+﻿/***Main***
+/**Allow positive number ONLY**
+/**User will be asked to input the correct operation, if user input invalid operation**
+Begin, 		JnS operation		/to input operations
+            Halt				/to terminate the program
+
+/***Subroutine for operation***
+operation,	HEX 0				/subroutine
+            input				/allow user to input unicode 'm', 'd', 'e','q'
+            Store selection		/store the input value into selection
+            Load selection		/load the selection
+            Subt uni_m			/subtract by 'm'
+            Skipcond 400		/if selection - 'm' = 0, skip to perform multiplication 
+            Jump D				/if no, check with other operation
+            Jump m				/if yes, multiplication occurs
+            
+D,     		Load selection 		/load the selection
+            Subt uni_d			/subtract by 'd'
+            Skipcond 400		/if selection -'d'=0, skip to perform division
+            Jump E				/if no, check with other operation
+            Jump d				/if yes, division occurs
+            
+E,     		Load selection 		/load the selection
+            Subt uni_e 			/subtract by 'e'
+            Skipcond 400		/if selection -'e'=0, skip to perform exponent
+            Jump Q				/if no, check with other operation
+            Jump e				/if yes, exponent occurs
+            
+Q,     		Load selection		/load the selection
+            Subt uni_q 			/subtract by 'q'
+            Skipcond 400		/if selection -'q'=0, QUIT this calculator
+            Jump Begin			/if no, allow user input valid operation
+            JumpI operation		/if yes, Jump back to main to terminate
+
+/#unicode HEX value#
+selection, HEX 0 				/empty container to store user input value
+uni_m, HEX 6D					/unicode for 'm'
+uni_d, HEX 64					/unicode for 'd'
+uni_e, HEX 65					/unicode for 'e'
+uni_q, HEX 71    				/unicode for 'q'
+        
+/#if user input 'm' for multiplication# 
+/input number, plus MulY for MulX times
+m,		input 					/allow user input MulX
+		store MulX				/store it into MulX
+		input					/allow user input MulY
+		store MulY				/store it into MulY
+		JnS Mul					/multiplication process
+		Load Mulres				/load the ans for multiplication
+		Output 					/print it
+		Jump Begin				/Restart program
+
+/#if user input d for division#
+/input number, DivY divides DivX (DivX/DivY)
+d,		input 					/allow user input DivY (smaller num)
+		store DivY				/store it into DivY(SMALLER +ve num)
+		input 					/allow user input DivX (bigger num)
+		store DivX				/store it into DivX(BIGGER +ve num)
+		JnS Div					/division process
+		Load Divres				/load the ans for division
+		output					/print it
+		Jump Begin				/Restart program
+
+/#if user input e for exponent#
+/input number, ExpX^ExpY
+e,		input					/allow user to input ExpY (power)
+		store ExpY       		/store it into ExpY
+		input 					/allow user to input ExpX (base)
+		store ExpX          	/store it into ExpX
+		JnS Exp					/exponent process
+		Load Expres				/load the ans for exponent
+		Output					/print it
+		Jump Begin				/Restart program
+
+/***Subroutine Exponent***
+/#calculation perform here X^Y#
+ExpY, 	Dec 0					/first input(power)
+ExpX, 	Dec 0					/second input(base)
+Expres, Dec 0 					/result
+Exp, 	HEX 0					/subroutine
+		Load one				/load value 1 
+        Store Expres			/store value 1 into Expres
+Eloop,  Load ExpY				/load the power num user input
+        Skipcond 800			/check ExpY>0
+        JumpI Exp				/if no, quit exponent 
+		Load Expres				/if yes, exponent process continue
+        Store MulX				/store Expres value into MulX
+        Load ExpX				/Load ExpX value
+        Store MulY				/store ExpX value into MulY
+        JnS Mul					/jump to multiplication process
+        Load Mulres				/load the ans for multiplication 
+        Store Expres			/store Mulres value into Expres
+        Load ExpY				/act as counter for exponent
+        Subt one				/by subtracting 1
+        Store ExpY				/after subtracting, store into ExpY 
+        Jump Eloop				/if ExpY != 0, loop again to get the final Expres
+
+/***Subroutine Multiplication***
+/#calculation perform here X*Y#
+MulX, Dec 0						/first input
+MulY, Dec 0						/second input
+Mulres, Dec 0					/result
+one, Dec 1						/increment
+Mul, 	HEX 0					/subroutine
+		Clear					/clear the previous Mulres value
+        Store Mulres			/Mulres value = 0
+Mloop, 	load MulX				/Load MulX value
+		Skipcond 800			/check MulX>0
+		JumpI Mul				/if no, quit multiplication
+		load Mulres				/if yes, multiplication process continue
+   		Add MulY				/plus MulY value for MulX times 
+   		store Mulres			/after adding, store into Mulres
+    	load MulX				/act as counter for multiplication
+   		Subt one				/by subtracting 1
+    	store MulX				/after subtracting, store into MulX
+    	Jump Mloop    			/if MulX != 0, loop again to get the final Mulres
+
+/***Subroutine Division***
+/#calculation perform here X/Y (Y divides X)#
+DivY, 	Dec 0 					/first input(smaller num)
+DivX, 	Dec 0 					/second input(bigger num)
+Divres, Dec 0					/result
+Div,	HEX 0					/subroutine
+		Clear
+        Store Divres
+Dloop,	Load DivX				/load DivX value
+		Skipcond 800			/check DivX>0
+        JumpI Div				/if no, quit division
+        Load DivX				/if yes, division process continue
+        Subt DivY				/DivX minus DivY value until DivX become 0
+        Store DivX				/after subtracting, store into DivX
+        Load Divres				/DivX minus DivY value for n times, the n times is the ans for division
+        Add one					/to calculate n times by using counter
+        Store Divres			/act as counter each time DivX minus DivY the counter will increment by 1 
+        Jump Dloop				/loop until the DivX become 0
+
