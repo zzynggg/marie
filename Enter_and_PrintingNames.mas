@@ -1,4 +1,6 @@
-﻿/***Main***
+﻿/Author: Yong Zi Ying
+/Grade: 10/10 HD
+/***Main***
 Begin,				JnS subInputNames		/allow user to input name
 					JnS printStringName		/to print user input name
                     Halt					/to terminate the program
